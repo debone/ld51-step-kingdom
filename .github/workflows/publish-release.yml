@@ -1,0 +1,39 @@
+name: Publish to release branch itch.io
+
+env:
+  ITCHIO_CHANNEL: html5
+  ITCHIO_GAME: testing-deploy-404
+  ITCHIO_USERNAME: debone
+
+# You can block these tags from push on github settings
+on:
+  push:
+    tags:
+      - "v*"
+      - "!v*-beta.*"
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Build
+        run: |
+          yarn
+          yarn run build
+      - name: Set Version
+        run: |
+          echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      - name: Upload to itch.io project
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCHIO_CREDENTIALS }}
+          CHANNEL: ${{ env.ITCHIO_CHANNEL }}
+          ITCH_GAME: ${{ env.ITCHIO_GAME }}
+          ITCH_USER: ${{ env.ITCHIO_USERNAME }}
+          PACKAGE: dist
+          VERSION: ${{ env.version }}
