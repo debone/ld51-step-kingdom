@@ -3,6 +3,8 @@ import { Pane } from "tweakpane";
 import Phaser from "phaser";
 
 import outsideMap from "../assets/map/outside.tmj?url";
+import { Human } from "../entities/human";
+import human from "../assets/map/dungeonPack/Characters/Male/Male_6_Idle0.png?url";
 //import images from "../assets/map/dungeonPack/Isometric/*?url";
 
 const imageIso = import.meta.glob<{ default: string }>("../assets/map/dungeonPack/Isometric/*", { eager: true });
@@ -37,6 +39,7 @@ function debugEvery(after: number) {
 
 const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
+  HUMAN: "human",
 };
 
 //const mapSizeX = 16;
@@ -73,10 +76,11 @@ export class SceneMain extends Phaser.Scene {
       this.load.image(sprite.replace("../assets/map/", ""), imageIso[sprite].default);
     }
 
-    this.load.image("src/assets/map/dungeonPack/Characters/Male/Male_6_Idle0.png", "human");
+    this.load.image(RESOURCES.HUMAN, human);
   }
 
   declare floorLayer: Phaser.Tilemaps.TilemapLayer;
+  declare objectLayer: Phaser.Tilemaps.TilemapLayer;
   declare pane: Pane;
   declare params: any;
   declare marker: Phaser.GameObjects.Graphics;
@@ -109,14 +113,20 @@ export class SceneMain extends Phaser.Scene {
     this.floorLayer = this.map.createLayer("Floor", this.map.tilesets)!;
     this.floorLayer.setCullPadding(1, 4);
 
-    //this.floorLayer.setPosition(0, -256);
+    //this.floorLayer.setPosition(0, -256)
+
+    this.objectLayer = this.map.createLayer("Objects", this.map.tilesets)!;
+
+    const humanPlace = this.map.tileToWorldXY(9, 9)!;
+    const human = new Human(this, humanPlace.x, humanPlace.y, RESOURCES.HUMAN);
+    human.setOrigin(0, 0.75);
+    this.add.existing(human);
 
     const cursors = this.input.keyboard!.createCursorKeys();
 
     //this.cameras.main.setBounds(-2048, 500, 4096, 2048);
     //this.cameras.main.useBounds = true;
     this.cameras.main.setZoom(0.5);
-    this.cameras.main.setRoundPixels(true);
     this.cameras.main.centerOn(tileSizeX / 2, (tileSizeY * mapSizeY) / 2);
 
     var controlConfig = {
