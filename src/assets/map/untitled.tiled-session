@@ -1,0 +1,38 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "dungeonPack.tsx",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "dungeonPack.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.1215,
+            "scaleInEditor": 1
+        },
+        "outside.tmx#dungeons": {
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "/Users/vdebone/Personal/psrc/ld51-step-kingdom/src/assets/map",
+    "last.imagePath": "/Users/vdebone/Personal/psrc/ld51-step-kingdom/src/assets/map/dungeonPack/Isometric",
+    "map.height": 16,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.orientation": null,
+    "map.tileHeight": 128,
+    "map.tileWidth": 256,
+    "map.width": 16,
+    "openFiles": [
+        "dungeonPack.tsx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "dungeonPack.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 1
+}
