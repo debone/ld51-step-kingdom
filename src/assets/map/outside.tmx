@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="isometric" renderorder="right-down" width="16" height="16" tilewidth="256" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.9" tiledversion="1.9.2" orientation="isometric" renderorder="right-down" width="16" height="16" tilewidth="256" tileheight="128" infinite="0" nextlayerid="3" nextobjectid="1">
  <editorsettings>
   <export target="outside.tmj" format="json"/>
  </editorsettings>
@@ -890,4 +890,5 @@
 86,89,87,86,87,88,88,86,123,124,123,122,122,122,124,123
 </data>
  </layer>
+ <objectgroup id="2" name="Objects"/>
 </map>

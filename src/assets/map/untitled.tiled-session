@@ -13,7 +13,29 @@
             "scaleInDock": 0.1215,
             "scaleInEditor": 1
         },
+        "dungeonPack/Samples/Tiled Sample/Sample.tmx": {
+            "scale": 0.4702,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 6547.213951509995,
+                "y": 3025.3083794130157
+            }
+        },
+        "dungeonPack/Samples/Tiled Sample/Sample.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "outside.tmx": {
+            "scale": 0.23,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1989.1304347826085,
+                "y": 1015.2173913043478
+            }
+        },
         "outside.tmx#dungeons": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.1668,
             "scaleInEditor": 1
         }
     },
@@ -31,6 +53,7 @@
     ],
     "project": "untitled.tiled-project",
     "recentFiles": [
+        "dungeonPack/Samples/Tiled Sample/Sample.tmx",
         "dungeonPack.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
