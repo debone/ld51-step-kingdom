@@ -59,7 +59,7 @@ export class SceneMain extends Phaser.Scene {
     this.controls = new Phaser.Cameras.Controls.SmoothedKeyControl(controlConfig);
   }
 
-  update(time: number, delta: number) {
+  update(_time: number, delta: number) {
     this.controls.update(delta);
   }
 }
