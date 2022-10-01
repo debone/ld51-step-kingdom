@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import outsideMap from "../assets/map/outside.tmj?url";
 //import images from "../assets/map/dungeonPack/Isometric/*?url";
 
-const imageIso = import.meta.glob("../assets/map/dungeonPack/Isometric/*", { eager: true });
+const imageIso = import.meta.glob<{ default: string }>("../assets/map/dungeonPack/Isometric/*", { eager: true });
 
 const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
@@ -59,7 +59,7 @@ export class SceneMain extends Phaser.Scene {
     this.controls = new Phaser.Cameras.Controls.SmoothedKeyControl(controlConfig);
   }
 
-  update(time, delta) {
+  update(time: number, delta: number) {
     this.controls.update(delta);
   }
 }
