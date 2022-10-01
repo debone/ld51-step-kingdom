@@ -1,3 +1,5 @@
+import { Pane } from "tweakpane";
+
 import Phaser from "phaser";
 
 import outsideMap from "../assets/map/outside.tmj?url";
@@ -8,6 +10,12 @@ const imageIso = import.meta.glob<{ default: string }>("../assets/map/dungeonPac
 const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
 };
+
+const mapSizeX = 16;
+const mapSizeY = 16;
+
+const tileSizeX = 256;
+const tileSizeY = 128;
 
 export class SceneMain extends Phaser.Scene {
   declare controls: Phaser.Cameras.Controls.SmoothedKeyControl;
@@ -23,7 +31,20 @@ export class SceneMain extends Phaser.Scene {
     }
   }
 
+  declare floorLayer: Phaser.Tilemaps.TilemapLayer;
+  declare pane: Pane;
+  declare params: any;
+  declare graphics: Phaser.GameObjects.Graphics;
   create() {
+    this.params = {
+      X: 0,
+    };
+    this.pane = new Pane();
+    this.pane.addInput(this.params, "X", {
+      min: -500,
+      max: 500,
+    });
+
     this.add.text(100, 100, "Maaain", {
       font: "15vw verdana",
       color: "white",
@@ -31,7 +52,9 @@ export class SceneMain extends Phaser.Scene {
 
     imageIso;
 
-    const map = this.make.tilemap({ key: RESOURCES.MAP_OUTSIDE });
+    const map = this.add.tilemap(RESOURCES.MAP_OUTSIDE);
+
+    console.log(map);
 
     // add the tileset image we are using
     //const tileset = map.addTilesetImage("standard_tiles", "base_tiles");
@@ -39,11 +62,16 @@ export class SceneMain extends Phaser.Scene {
       map.addTilesetImage(sprite.replace("../assets/map/", ""), sprite.replace("../assets/map/", ""));
     }
     // create the layers we want in the right order
-    map.createLayer("Floor", map.tilesets);
+    this.floorLayer = map.createLayer("Floor", map.tilesets);
+    this.floorLayer.setCullPadding(1, 4);
+    this.floorLayer.setOrigin(0, -256);
 
     const cursors = this.input.keyboard.createCursorKeys();
 
-    this.cameras.main.setZoom(0.5);
+    //this.cameras.main.setBounds(-2048, 500, 4096, 2048);
+    //this.cameras.main.useBounds = true;
+    this.cameras.main.setZoom(0.3);
+    this.cameras.main.centerOn(tileSizeX / 2, 384 + (tileSizeY * mapSizeY) / 2);
 
     var controlConfig = {
       camera: this.cameras.main,
@@ -57,9 +85,21 @@ export class SceneMain extends Phaser.Scene {
     };
 
     this.controls = new Phaser.Cameras.Controls.SmoothedKeyControl(controlConfig);
+    //this.floorLayer.renderDebug(this.graphics);
+    //this.floorLayer.setAlpha(0);
+
+    this.graphics = this.add.graphics();
+
+    this.graphics.fillStyle(0x9966ff, 1);
+    this.graphics.fillCircle(0, 0, 10);
+    this.graphics.fillCircle(0, 512, 10);
+    this.graphics.fillCircle(256, 512, 10);
+    this.graphics.fillCircle(128, 448, 10);
   }
 
   update(_time: number, delta: number) {
     this.controls.update(delta);
+    //this.floorLayer.setOrigin(0, -1);
+    //this.floorLayer.setPosition(0, this.params.X);
   }
 }
