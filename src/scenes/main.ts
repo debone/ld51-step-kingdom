@@ -18,6 +18,7 @@ function log(log: any) {
 }
 log(1);
 
+/*
 let num: number;
 let isSet: boolean = false;
 function debugEvery(after: number) {
@@ -35,7 +36,7 @@ function debugEvery(after: number) {
     debugger;
     num = after;
   }
-}
+}*/
 
 const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
@@ -163,7 +164,7 @@ export class SceneMain extends Phaser.Scene {
     //this.floorLayer.tilemap.renderDebugFull(this.marker);
   }
 
-  update(time: number, delta: number) {
+  update(_time: number, delta: number) {
     this.controls.update(delta);
     //this.floorLayer.setOrigin(0, -1);
     //this.floorLayer.setPosition(0, this.params.X);
