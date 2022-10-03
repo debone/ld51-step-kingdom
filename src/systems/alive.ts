@@ -8,13 +8,14 @@ export class AliveGroup extends Phaser.GameObjects.Group {
 
     this.map = map;
 
-    this.on("wololo", (eee) => {
-      console.log("group", eee);
-    });
-
     this.on("pulse", () => {
+      const children = this.getChildren() as Human[];
+
+      //think
+      children.forEach((child) => child.think());
+
       //collect all the intents
-      const intents = this.getChildren().map((child: any) => child.getIntent()!);
+      const intents = children.map((child) => child.getIntent());
       //execute them
       this.runHumans(intents);
     });

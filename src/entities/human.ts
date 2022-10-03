@@ -175,6 +175,12 @@ export class Human extends Phaser.GameObjects.Sprite {
     return { x: this.posX, y: this.posY };
   }
 
+  think() {
+    if (this.humanType.type === "player") {
+      return;
+    }
+  }
+
   declare currentIntent: {};
 
   setIntent() {}

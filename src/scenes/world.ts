@@ -5,6 +5,7 @@ import Phaser from "phaser";
 import { Directions, Human } from "../entities/human";
 import { imageIso, RESOURCES } from "./main";
 import { AliveGroup } from "../systems/alive";
+import PhaserGamebus from "../gamebus";
 
 //const imageIso = import.meta.glob<{ default: string }>("../assets/map/dungeonPack/Isometric/*", { eager: true });
 
@@ -60,6 +61,8 @@ const tileFloorHeight: { [index: number]: number } = {
 
 export class SceneWorld extends Phaser.Scene {
   declare controls: Phaser.Cameras.Controls.SmoothedKeyControl;
+  gamebus!: PhaserGamebus;
+  bus!: Phaser.Events.EventEmitter;
 
   constructor() {
     super({ key: "SceneWorld" });
@@ -74,6 +77,10 @@ export class SceneWorld extends Phaser.Scene {
   declare map: Phaser.Tilemaps.Tilemap;
 
   create() {
+    this.scene.run("SceneHUD", { sceneWorld: this });
+
+    this.bus = this.gamebus.getBus();
+
     this.params = {
       coord: { x: 50, y: 25 },
     };
@@ -102,10 +109,38 @@ export class SceneWorld extends Phaser.Scene {
 
     this.objects = new AliveGroup(this, this.map);
 
-    const humanPlace = this.map.tileToWorldXY(9, 9)!;
-    const human = new Human(this, humanPlace.x, humanPlace.y, 9, 9, RESOURCES.HUMAN, "player", Directions.LEFT);
+    const humanPlace = this.map.tileToWorldXY(10, 7)!;
+    const human = new Human(this, humanPlace.x, humanPlace.y, 10, 7, RESOURCES.HUMAN_LEFT, "player", Directions.LEFT);
     this.objects.add(human);
     this.add.existing(human);
+
+    const archerOnePlace = this.map.tileToWorldXY(4, 7)!;
+    const archerOne = new Human(
+      this,
+      archerOnePlace.x,
+      archerOnePlace.y,
+      4,
+      7,
+      RESOURCES.HUMAN_RIGHT,
+      "archer",
+      Directions.RIGHT
+    );
+    this.objects.add(archerOne);
+    this.add.existing(archerOne);
+
+    const archerTwoPlace = this.map.tileToWorldXY(4, 6)!;
+    const archerTwo = new Human(
+      this,
+      archerTwoPlace.x,
+      archerTwoPlace.y,
+      4,
+      6,
+      RESOURCES.HUMAN_RIGHT,
+      "archer",
+      Directions.RIGHT
+    );
+    this.objects.add(archerTwo);
+    this.add.existing(archerTwo);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
 
@@ -152,6 +187,7 @@ export class SceneWorld extends Phaser.Scene {
     this.controls.update(delta);
 
     if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+      this.gamebus.emit("pulse", _time);
       this.objects.emit("pulse", _time);
     }
 

@@ -3,13 +3,28 @@ import Phaser from "phaser";
 declare var WebFont: any;
 
 import outsideMap from "../assets/map/outside.tmj?url";
-import human from "../assets/map/dungeonPack/Characters/Male/Male_6_Idle0.png?url";
+import humanTop from "../assets/map/dungeonPack/Characters/Male/Male_0_Idle0.png?url";
+import humanRight from "../assets/map/dungeonPack/Characters/Male/Male_2_Idle0.png?url";
+import humanBottom from "../assets/map/dungeonPack/Characters/Male/Male_4_Idle0.png?url";
+import humanLeft from "../assets/map/dungeonPack/Characters/Male/Male_6_Idle0.png?url";
+
+import arrowTop from "../assets/arrow/arrowTop.png?url";
+import arrowRight from "../assets/arrow/arrowRight.png?url";
+import arrowBottom from "../assets/arrow/arrowBottom.png?url";
+import arrowLeft from "../assets/arrow/arrowLeft.png?url";
 
 export const imageIso = import.meta.glob<{ default: string }>("../assets/map/dungeonPack/Isometric/*", { eager: true });
 
 export const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
-  HUMAN: "human",
+  HUMAN_TOP: "humanTop",
+  HUMAN_RIGHT: "humanRight",
+  HUMAN_BOTTOM: "humanBottom",
+  HUMAN_LEFT: "humanLeft",
+  ARROW_TOP: "arrowTop",
+  ARROW_RIGHT: "arrowRight",
+  ARROW_BOTTOM: "arrowBottom",
+  ARROW_LEFT: "arrowLeft",
 };
 
 export class SceneMain extends Phaser.Scene {
@@ -25,7 +40,15 @@ export class SceneMain extends Phaser.Scene {
       this.load.image(sprite.replace("../assets/map/", ""), imageIso[sprite].default);
     }
 
-    this.load.image(RESOURCES.HUMAN, human);
+    this.load.image(RESOURCES.HUMAN_TOP, humanTop);
+    this.load.image(RESOURCES.HUMAN_RIGHT, humanRight);
+    this.load.image(RESOURCES.HUMAN_BOTTOM, humanBottom);
+    this.load.image(RESOURCES.HUMAN_LEFT, humanLeft);
+
+    this.load.image(RESOURCES.ARROW_TOP, arrowTop);
+    this.load.image(RESOURCES.ARROW_RIGHT, arrowRight);
+    this.load.image(RESOURCES.ARROW_BOTTOM, arrowBottom);
+    this.load.image(RESOURCES.ARROW_LEFT, arrowLeft);
 
     this.load.script("webfont", "https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js");
   }

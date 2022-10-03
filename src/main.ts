@@ -4,6 +4,7 @@ import Phaser from "phaser";
 
 import { SceneMain } from "./scenes/main";
 import { SceneWorld } from "./scenes/world";
+import { SceneHUD } from "./scenes/hud";
 
 import { GAME_CONFIG } from "./consts";
 import PhaserGamebus from "./gamebus";
@@ -20,7 +21,7 @@ export const config = {
       },
     ],
   },
-  scene: [SceneMain, SceneWorld],
+  scene: [SceneMain, SceneWorld, SceneHUD],
 };
 
 new Phaser.Game(config);
