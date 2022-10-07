@@ -99,6 +99,11 @@
                          "name":"direction",
                          "type":"string",
                          "value":"right"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"archer"
                         }],
                  "rotation":0,
                  "visible":true,
@@ -117,6 +122,11 @@
                          "name":"direction",
                          "type":"string",
                          "value":"right"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"archer"
                         }],
                  "rotation":0,
                  "visible":true,
@@ -135,6 +145,11 @@
                          "name":"direction",
                          "type":"string",
                          "value":"left"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"player"
                         }],
                  "rotation":0,
                  "visible":true,
