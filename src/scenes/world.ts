@@ -69,6 +69,9 @@ export class SceneWorld extends Phaser.Scene {
   }
 
   declare floorLayer: Phaser.Tilemaps.TilemapLayer;
+  declare structureLayer: Phaser.Tilemaps.TilemapLayer;
+  declare collisionLayer: Phaser.Tilemaps.TilemapLayer;
+  declare objectLayer: Phaser.Tilemaps.ObjectLayer;
   declare objects: Phaser.GameObjects.Group;
   declare pane: Pane;
   declare params: any;
@@ -137,9 +140,24 @@ export class SceneWorld extends Phaser.Scene {
     this.floorLayer = this.map.createLayer("Floor", this.map.tilesets)!;
     this.floorLayer.setCullPadding(1, 4);
 
-    //this.floorLayer.setPosition(0, -256)
+    this.structureLayer = this.map.createLayer("Scenary", this.map.tilesets)!;
+
+    this.collisionLayer = this.map.createLayer("Collision", [])!;
+
+    this.objectLayer = this.map.getObjectLayer("Objects")!;
 
     this.objects = new AliveGroup(this, this.map);
+
+    this.objectLayer.objects.map((object) => {
+      const objectType = object.properties?.filter((property) => property.name === "type")[0];
+      if (objectType) {
+        const direction = object.properties.filter((property) => property.name === "direction")[0];
+        console.log("adding human", direction, objectType, object);
+        this.addHuman(Math.floor(object.x! / 128), Math.floor(object.y! / 128), direction.value, objectType.value);
+      }
+    });
+
+    //this.floorLayer.setPosition(0, -256)
 
     /*
     const humanPlace = this.map.tileToWorldXY(10, 7)!;
@@ -155,10 +173,10 @@ export class SceneWorld extends Phaser.Scene {
     );
     this.objects.add(human);
     this.add.existing(human);*/
-    this.addHuman(10, 7, Directions.LEFT, HumanTypes.PLAYER);
+    //this.addHuman(10, 7, Directions.LEFT, HumanTypes.PLAYER);
 
     //
-    this.addHuman(3, 7, Directions.RIGHT, HumanTypes.ARCHER);
+    //this.addHuman(3, 7, Directions.RIGHT, HumanTypes.ARCHER);
     //this.addHuman(4, 7, Directions.RIGHT, HumanTypes.ARROW);
     /*const archerOnePlace = this.map.tileToWorldXY(4, 7)!;
     const archerOne = new Human(
@@ -241,7 +259,7 @@ export class SceneWorld extends Phaser.Scene {
     //this.floorLayer.setPosition(0, this.params.X);
     const worldPoint = this.input.activePointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
 
-    const pointerTile = this.map.worldToTileXY(
+    const pointerTile = this.floorLayer.worldToTileXY(
       worldPoint.x - this.map.tileWidth / 2,
       worldPoint.y, //- this.map.tileWidth / 2,
       true
@@ -250,15 +268,16 @@ export class SceneWorld extends Phaser.Scene {
     //    console.log(this.map.getTileAt(pointerTile.x, pointerTile.y));
 
     if (pointerTile) {
-      const worldCoord = this.map.tileToWorldXY(pointerTile.x, pointerTile.y);
+      const worldCoord = this.floorLayer.tileToWorldXY(pointerTile.x, pointerTile.y);
 
       if (worldCoord) {
-        const tileAt = this.map.getTileAt(pointerTile.x, pointerTile.y);
+        const tileAt = this.floorLayer.getTileAt(pointerTile.x, pointerTile.y);
         if (tileAt) {
           // Snap to tile coordinates, but in world space
           this.marker.x = worldCoord.x;
           this.marker.y = worldCoord.y - tileFloorHeight[tileAt.index];
 
+          //log(`mouse is at, ${worldCoord.x}, ${worldCoord.y}`);
           //debugEvery(500);
 
           this.params.coord.x = pointerTile.x;
