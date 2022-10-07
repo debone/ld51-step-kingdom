@@ -1,8 +1,8 @@
 export enum Directions {
-  UP = 0,
-  RIGHT = 1,
-  DOWN = 2,
-  LEFT = 3,
+  UP = "up",
+  RIGHT = "right",
+  DOWN = "down",
+  LEFT = "left",
 }
 
 export const inFrontOf = {
@@ -42,12 +42,20 @@ enum Status {
   WALKING_HANDSUP = 3,
 }*/
 
+export enum HumanTypes {
+  PLAYER = "player",
+  PEASANT = "peasant",
+  KNIGHT = "knight",
+  ARCHER = "archer",
+  ARROW = "arrow",
+}
+
 export const PlayerHuman = {
   health: 5,
   maxHealth: 5,
   stamina: 5,
   maxStamina: 5,
-  type: "player",
+  type: HumanTypes.PLAYER,
 };
 
 export const PeasantHuman = {
@@ -55,7 +63,7 @@ export const PeasantHuman = {
   maxStamina: 2,
   health: 1,
   maxHealth: 1,
-  type: "peasant",
+  type: HumanTypes.PEASANT,
 };
 
 export const KnightHuman = {
@@ -63,7 +71,7 @@ export const KnightHuman = {
   maxHealth: 3,
   stamina: 3,
   maxStamina: 3,
-  type: "knight",
+  type: HumanTypes.KNIGHT,
 };
 
 export const ArcherHuman = {
@@ -71,7 +79,7 @@ export const ArcherHuman = {
   maxHealth: 2,
   stamina: 4,
   maxStamina: 4,
-  type: "archer",
+  type: HumanTypes.ARCHER,
 };
 
 export const ArrowHuman = {
@@ -79,7 +87,7 @@ export const ArrowHuman = {
   maxHealth: 1,
   stamina: 0,
   maxStamina: 0,
-  type: "arrow",
+  type: HumanTypes.ARROW,
 };
 
 export class Human extends Phaser.GameObjects.Sprite {
@@ -88,8 +96,31 @@ export class Human extends Phaser.GameObjects.Sprite {
   declare posX: number;
   declare posY: number;
 
-  declare stamina: number;
-  declare health: number;
+  declare _stamina: number;
+  declare _health: number;
+
+  get stamina(): number {
+    return this._stamina;
+  }
+
+  set stamina(amount: number) {
+    console.log("sta", this.humanType.type, amount);
+    this._stamina = Math.max(0, Math.min(this.maxStamina, amount));
+    if (this._stamina === 0) {
+      console.log("rest mate");
+    }
+  }
+
+  get health(): number {
+    return this._health;
+  }
+
+  set health(amount: number) {
+    this._health = Math.max(0, Math.min(this.maxHealth, amount));
+    if (this._health === 0) {
+      console.log("deaded");
+    }
+  }
 
   declare maxStamina: number;
   declare maxHealth: number;
@@ -110,12 +141,7 @@ export class Human extends Phaser.GameObjects.Sprite {
     posX: number,
     posY: number,
     texture: string | Phaser.Textures.Texture,
-    humanType:
-      | typeof PlayerHuman["type"]
-      | typeof PeasantHuman["type"]
-      | typeof KnightHuman["type"]
-      | typeof ArcherHuman["type"]
-      | typeof ArrowHuman["type"],
+    humanType: HumanTypes,
     direction: Directions,
     frame?: string | number | undefined
   ) {
@@ -153,16 +179,22 @@ export class Human extends Phaser.GameObjects.Sprite {
     this.direction = direction;
 
     //this.playerPos = new Phaser.Math.Vector2(x, y);
-    this.hud = this.scene.add
-      .text(this.getCenter().x, this.getCenter().y, this.getHudText(), {
-        fontFamily: "Alkalami",
-        fontSize: "36px",
-        color: "#ffffff",
-      })
-      .setShadow(2, 2, "#333333", 2, false, true);
+    if (this.humanType.type !== "arrow") {
+      this.hud = this.scene.add
+        .text(this.getCenter().x, this.getCenter().y, this.getHudText(), {
+          fontFamily: "Alkalami",
+          fontSize: "36px",
+          color: "#ffffff",
+        })
+        .setShadow(2, 2, "#333333", 2, false, true);
+    }
   }
 
   updateHud() {
+    if (this.humanType.type === "arrow") {
+      return;
+    }
+
     this.hud.setPosition(this.getCenter().x, this.getCenter().y);
     this.hud.setText(this.getHudText());
   }
@@ -177,25 +209,57 @@ export class Human extends Phaser.GameObjects.Sprite {
 
   think() {
     if (this.humanType.type === "player") {
+      this.setIntent(Moves.MOVE);
+      return;
+    }
+
+    if (this.humanType.type === "archer") {
+      if (this.stamina >= MovesStats[Moves.ATTACK].costStamina) {
+        console.log("attack");
+        this.setIntent(Moves.ATTACK);
+      } else {
+        console.log("rest");
+        this.setIntent(Moves.REST);
+      }
+      return;
+    }
+
+    if (this.humanType.type === "arrow") {
+      this.setIntent(Moves.MOVE);
       return;
     }
   }
 
   declare currentIntent: {};
 
-  setIntent() {}
+  setIntent(move: Moves) {
+    this.currentIntent = { move, owner: this };
+  }
 
   getIntent() {
-    return { move: Moves.MOVE, owner: this };
+    return this.currentIntent;
   }
 
   [Moves.MOVE](newTilePos: { x: number; y: number }, newWorldPos: Phaser.Math.Vector2) {
-    this.stamina -= MovesStats[Moves.MOVE].costStamina;
-
     this.posX = newTilePos.x;
     this.posY = newTilePos.y;
 
     this.setPosition(newWorldPos.x, newWorldPos.y);
+
+    if (this.humanType.type !== "arrow") {
+      this.stamina -= MovesStats[Moves.MOVE].costStamina;
+      this.updateHud();
+    }
+  }
+
+  [Moves.ATTACK](pos: { x: number; y: number }, direction: Directions) {
+    this.stamina -= MovesStats[Moves.ATTACK].costStamina;
+
+    this.updateHud();
+  }
+
+  [Moves.REST]() {
+    this.stamina -= MovesStats[Moves.REST].costStamina;
     this.updateHud();
   }
 }

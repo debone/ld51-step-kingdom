@@ -2,7 +2,7 @@ import { Pane } from "tweakpane";
 
 import Phaser from "phaser";
 
-import { Directions, Human } from "../entities/human";
+import { Directions, Human, HumanTypes } from "../entities/human";
 import { imageIso, RESOURCES } from "./main";
 import { AliveGroup } from "../systems/alive";
 import PhaserGamebus from "../gamebus";
@@ -76,6 +76,38 @@ export class SceneWorld extends Phaser.Scene {
   declare cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   declare map: Phaser.Tilemaps.Tilemap;
 
+  addHuman(x: number, y: number, direction: Directions, type: HumanTypes) {
+    const archerOnePlace = this.map.tileToWorldXY(x, y);
+
+    if (archerOnePlace === null) {
+      return;
+    }
+
+    let t;
+    switch (type) {
+      case HumanTypes.ARCHER:
+      case HumanTypes.KNIGHT:
+      case HumanTypes.PEASANT:
+      case HumanTypes.PLAYER:
+        t = "HUMAN";
+        break;
+      case HumanTypes.ARROW:
+        t = "ARROW";
+        break;
+    }
+
+    const resource = `${t}_${direction.toString().toUpperCase()}`;
+
+    const human = new Human(this, archerOnePlace.x, archerOnePlace.y, x, y, RESOURCES[resource], type, direction);
+
+    this.objects.add(human);
+    this.add.existing(human);
+
+    return human;
+  }
+
+  removeHuman() {}
+
   create() {
     this.scene.run("SceneHUD", { sceneWorld: this });
 
@@ -109,12 +141,26 @@ export class SceneWorld extends Phaser.Scene {
 
     this.objects = new AliveGroup(this, this.map);
 
+    /*
     const humanPlace = this.map.tileToWorldXY(10, 7)!;
-    const human = new Human(this, humanPlace.x, humanPlace.y, 10, 7, RESOURCES.HUMAN_LEFT, "player", Directions.LEFT);
+    const human = new Human(
+      this,
+      humanPlace.x,
+      humanPlace.y,
+      10,
+      7,
+      RESOURCES.HUMAN_LEFT,
+      HumanTypes.PLAYER,
+      Directions.LEFT
+    );
     this.objects.add(human);
-    this.add.existing(human);
+    this.add.existing(human);*/
+    this.addHuman(10, 7, Directions.LEFT, HumanTypes.PLAYER);
 
-    const archerOnePlace = this.map.tileToWorldXY(4, 7)!;
+    //
+    this.addHuman(3, 7, Directions.RIGHT, HumanTypes.ARCHER);
+    //this.addHuman(4, 7, Directions.RIGHT, HumanTypes.ARROW);
+    /*const archerOnePlace = this.map.tileToWorldXY(4, 7)!;
     const archerOne = new Human(
       this,
       archerOnePlace.x,
@@ -126,8 +172,8 @@ export class SceneWorld extends Phaser.Scene {
       Directions.RIGHT
     );
     this.objects.add(archerOne);
-    this.add.existing(archerOne);
-
+    this.add.existing(archerOne);*/
+    /*
     const archerTwoPlace = this.map.tileToWorldXY(4, 6)!;
     const archerTwo = new Human(
       this,
@@ -140,7 +186,7 @@ export class SceneWorld extends Phaser.Scene {
       Directions.RIGHT
     );
     this.objects.add(archerTwo);
-    this.add.existing(archerTwo);
+    this.add.existing(archerTwo); */
 
     this.cursors = this.input.keyboard!.createCursorKeys();
 
