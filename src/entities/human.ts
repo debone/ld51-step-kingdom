@@ -1,3 +1,6 @@
+import { RESOURCES } from "../scenes/main";
+import { SceneWorld } from "../scenes/world";
+
 export enum Directions {
   UP = "up",
   RIGHT = "right",
@@ -18,6 +21,13 @@ export enum Moves {
   REST = 2,
   MOVE = 3,
 }
+
+export const MoveMarkColor = {
+  [Moves.ATTACK]: 0xff0000,
+  [Moves.DEFEND]: 0x0000ff,
+  [Moves.REST]: 0x00ffff,
+  [Moves.MOVE]: 0x00ff00,
+};
 
 export const MovesStats = {
   [Moves.ATTACK]: {
@@ -90,8 +100,28 @@ export const ArrowHuman = {
   type: HumanTypes.ARROW,
 };
 
+function getSprite(humanType: HumanTypes, direction: Directions) {
+  let t;
+  switch (humanType) {
+    case HumanTypes.ARCHER:
+    case HumanTypes.KNIGHT:
+    case HumanTypes.PEASANT:
+    case HumanTypes.PLAYER:
+      t = "HUMAN";
+      break;
+    case HumanTypes.ARROW:
+      t = "ARROW";
+      break;
+  }
+
+  const texture = `${t}_${direction.toString().toUpperCase()}` as keyof typeof RESOURCES;
+
+  return RESOURCES[texture];
+}
+
 export class Human extends Phaser.GameObjects.Sprite {
   declare hud: Phaser.GameObjects.Text;
+  declare marker: Phaser.GameObjects.Graphics;
 
   declare posX: number;
   declare posY: number;
@@ -133,22 +163,24 @@ export class Human extends Phaser.GameObjects.Sprite {
     | typeof ArrowHuman;
 
   declare direction: Directions;
+  declare sceneWorld: SceneWorld;
 
   constructor(
-    scene: Phaser.Scene,
+    scene: SceneWorld,
     x: number,
     y: number,
     posX: number,
     posY: number,
-    texture: string | Phaser.Textures.Texture,
     humanType: HumanTypes,
     direction: Directions,
     frame?: string | number | undefined
   ) {
-    super(scene, x, y, texture, frame);
+    super(scene, x, y, getSprite(humanType, direction), frame);
 
     this.posX = posX;
     this.posY = posY;
+
+    this.sceneWorld = scene;
 
     this.setOrigin(0, 0.75);
 
@@ -187,7 +219,25 @@ export class Human extends Phaser.GameObjects.Sprite {
           color: "#ffffff",
         })
         .setShadow(2, 2, "#333333", 2, false, true);
+
+      this.marker = this.scene.add.graphics();
+
+      if (this.humanType.type === HumanTypes.PLAYER) {
+        this.setIntent(Moves.REST);
+      } else {
+        this.think();
+      }
     }
+  }
+
+  setDirection(direction: Directions) {
+    console.log(direction);
+    // change sprite direction
+    this.direction = direction;
+    this.setTexture(getSprite(this.humanType.type, direction));
+
+    // change intention
+    this.setIntent(this.currentIntent.move);
   }
 
   updateHud() {
@@ -197,6 +247,41 @@ export class Human extends Phaser.GameObjects.Sprite {
 
     this.hud.setPosition(this.getCenter().x, this.getCenter().y);
     this.hud.setText(this.getHudText());
+  }
+
+  updateMarker() {
+    if (this.humanType.type === HumanTypes.ARROW) {
+      return;
+    }
+
+    this.marker.clear();
+
+    if (this.currentIntent?.move === Moves.ATTACK) {
+      this.sceneWorld.drawMark(
+        this.posX + inFrontOf[this.direction].x,
+        this.posY + inFrontOf[this.direction].y,
+        Phaser.Display.Color.IntegerToColor(MoveMarkColor[this.currentIntent.move]),
+        this.marker
+      );
+    }
+
+    if (this.currentIntent?.move === Moves.MOVE) {
+      this.sceneWorld.drawMark(
+        this.posX + inFrontOf[this.direction].x,
+        this.posY + inFrontOf[this.direction].y,
+        Phaser.Display.Color.IntegerToColor(MoveMarkColor[this.currentIntent.move]),
+        this.marker
+      );
+    }
+
+    if (this.currentIntent?.move === Moves.REST || this.currentIntent?.move === Moves.DEFEND) {
+      this.sceneWorld.drawMark(
+        this.posX,
+        this.posY,
+        Phaser.Display.Color.IntegerToColor(MoveMarkColor[this.currentIntent.move]),
+        this.marker
+      );
+    }
   }
 
   getHudText() {
@@ -209,7 +294,6 @@ export class Human extends Phaser.GameObjects.Sprite {
 
   think() {
     if (this.humanType.type === "player") {
-      this.setIntent(Moves.MOVE);
       return;
     }
 
@@ -230,10 +314,11 @@ export class Human extends Phaser.GameObjects.Sprite {
     }
   }
 
-  declare currentIntent: {};
+  declare currentIntent: { move: Moves; owner: Human };
 
   setIntent(move: Moves) {
     this.currentIntent = { move, owner: this };
+    this.updateMarker();
   }
 
   getIntent() {
@@ -248,18 +333,14 @@ export class Human extends Phaser.GameObjects.Sprite {
 
     if (this.humanType.type !== "arrow") {
       this.stamina -= MovesStats[Moves.MOVE].costStamina;
-      this.updateHud();
     }
   }
 
   [Moves.ATTACK](pos: { x: number; y: number }, direction: Directions) {
     this.stamina -= MovesStats[Moves.ATTACK].costStamina;
-
-    this.updateHud();
   }
 
   [Moves.REST]() {
     this.stamina -= MovesStats[Moves.REST].costStamina;
-    this.updateHud();
   }
 }

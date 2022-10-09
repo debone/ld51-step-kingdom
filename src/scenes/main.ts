@@ -17,15 +17,15 @@ export const imageIso = import.meta.glob<{ default: string }>("../assets/map/dun
 
 export const RESOURCES = {
   MAP_OUTSIDE: "map-outside",
-  HUMAN_TOP: "humanTop",
+  HUMAN_UP: "humanTop",
   HUMAN_RIGHT: "humanRight",
-  HUMAN_BOTTOM: "humanBottom",
+  HUMAN_DOWN: "humanBottom",
   HUMAN_LEFT: "humanLeft",
-  ARROW_TOP: "arrowTop",
+  ARROW_UP: "arrowTop",
   ARROW_RIGHT: "arrowRight",
-  ARROW_BOTTOM: "arrowBottom",
+  ARROW_DOWN: "arrowBottom",
   ARROW_LEFT: "arrowLeft",
-};
+} as const;
 
 export class SceneMain extends Phaser.Scene {
   declare keySpace: Phaser.Input.Keyboard.Key;
@@ -40,14 +40,14 @@ export class SceneMain extends Phaser.Scene {
       this.load.image(sprite.replace("../assets/map/", ""), imageIso[sprite].default);
     }
 
-    this.load.image(RESOURCES.HUMAN_TOP, humanTop);
+    this.load.image(RESOURCES.HUMAN_UP, humanTop);
     this.load.image(RESOURCES.HUMAN_RIGHT, humanRight);
-    this.load.image(RESOURCES.HUMAN_BOTTOM, humanBottom);
+    this.load.image(RESOURCES.HUMAN_DOWN, humanBottom);
     this.load.image(RESOURCES.HUMAN_LEFT, humanLeft);
 
-    this.load.image(RESOURCES.ARROW_TOP, arrowTop);
+    this.load.image(RESOURCES.ARROW_UP, arrowTop);
     this.load.image(RESOURCES.ARROW_RIGHT, arrowRight);
-    this.load.image(RESOURCES.ARROW_BOTTOM, arrowBottom);
+    this.load.image(RESOURCES.ARROW_DOWN, arrowBottom);
     this.load.image(RESOURCES.ARROW_LEFT, arrowLeft);
 
     this.load.script("webfont", "https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js");

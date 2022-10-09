@@ -15,12 +15,21 @@ export class AliveGroup extends Phaser.GameObjects.Group {
       const children = this.getChildren() as Human[];
 
       //think
-      children.forEach((child) => child.think());
+      children.forEach((child) => {
+        child.think();
+        child.updateMarker();
+      });
 
       //collect all the intents
       const intents = children.map((child) => child.getIntent());
       //execute them
       this.runHumans(intents);
+
+      children.forEach((child) => {
+        child.updateHud();
+        child.think();
+        child.updateMarker();
+      });
     });
 
     //this.createCallback = (obj) => console.log("added to group", obj);
@@ -69,11 +78,15 @@ export class AliveGroup extends Phaser.GameObjects.Group {
             if (human) {
               human.health = human.health - 1;
               //this.a
-              human.updateHud();
               subject.destroy();
               continue;
             }
           }
+
+          if (subject.humanType.type !== HumanTypes.ARROW && this.map.getTileAt(x, y, false, "Collision")) {
+            continue;
+          }
+
           subject[Moves.MOVE]({ x, y }, newWorldPos);
           break;
         }

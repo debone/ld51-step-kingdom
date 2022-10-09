@@ -1,8 +1,10 @@
 import { Pane } from "tweakpane";
 
-import Phaser from "phaser";
+import Phaser, { Display } from "phaser";
 
-import { Directions, Human, HumanTypes } from "../entities/human";
+const Color = Display.Color;
+
+import { Directions, Human, HumanTypes, Moves } from "../entities/human";
 import { imageIso, RESOURCES } from "./main";
 import { AliveGroup } from "../systems/alive";
 import PhaserGamebus from "../gamebus";
@@ -86,27 +88,70 @@ export class SceneWorld extends Phaser.Scene {
       return;
     }
 
-    let t;
-    switch (type) {
-      case HumanTypes.ARCHER:
-      case HumanTypes.KNIGHT:
-      case HumanTypes.PEASANT:
-      case HumanTypes.PLAYER:
-        t = "HUMAN";
-        break;
-      case HumanTypes.ARROW:
-        t = "ARROW";
-        break;
-    }
-
-    const resource = `${t}_${direction.toString().toUpperCase()}`;
-
-    const human = new Human(this, archerOnePlace.x, archerOnePlace.y, x, y, RESOURCES[resource], type, direction);
+    const human = new Human(this, archerOnePlace.x, archerOnePlace.y, x, y, type, direction);
 
     this.objects.add(human);
     this.add.existing(human);
 
+    if (type === HumanTypes.PLAYER) {
+      let wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+      let aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+      let sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+      let dKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+      let oneKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+      let twoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+      let threeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+      let fourKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+
+      wKey.on("down", function () {
+        human.setDirection(Directions.UP);
+      });
+      aKey.on("down", function () {
+        human.setDirection(Directions.LEFT);
+      });
+      sKey.on("down", function () {
+        human.setDirection(Directions.DOWN);
+      });
+      dKey.on("down", function () {
+        human.setDirection(Directions.RIGHT);
+      });
+
+      oneKey.on("down", function () {
+        human.setIntent(Moves.ATTACK);
+      });
+      twoKey.on("down", function () {
+        human.setIntent(Moves.DEFEND);
+      });
+      threeKey.on("down", function () {
+        human.setIntent(Moves.MOVE);
+      });
+      fourKey.on("down", function () {
+        human.setIntent(Moves.REST);
+      });
+    }
+
     return human;
+  }
+
+  drawMark(x: number, y: number, color: Color, graphics: Phaser.GameObjects.Graphics) {
+    // this.floorLayer?
+    const worldCoord = this.floorLayer.tileToWorldXY(x, y);
+    const tileAt = this.floorLayer.getTileAt(x, y);
+
+    // Snap to tile coordinates, but in world space
+    let tx = worldCoord.x;
+    let ty = tileAt ? worldCoord.y - tileFloorHeight[tileAt.index] : worldCoord.y;
+
+    graphics.lineStyle(7, color.color, 1);
+    graphics.translateCanvas(tx, ty);
+    graphics.beginPath();
+    graphics.moveTo(128, 0);
+    graphics.lineTo(256, 64);
+    graphics.lineTo(128, 128);
+    graphics.lineTo(0, 64);
+    graphics.lineTo(128, 0);
+    graphics.closePath();
+    graphics.strokePath();
   }
 
   removeHuman() {}
@@ -153,7 +198,12 @@ export class SceneWorld extends Phaser.Scene {
       if (objectType) {
         const direction = object.properties.filter((property) => property.name === "direction")[0];
         console.log("adding human", direction, objectType, object);
-        this.addHuman(Math.floor(object.x! / 128), Math.floor(object.y! / 128), direction.value, objectType.value);
+        this.addHuman(
+          Math.floor((object.x! - 64) / 128),
+          Math.floor((object.y! - 64) / 128),
+          direction.value,
+          objectType.value
+        );
       }
     });
 
@@ -234,16 +284,9 @@ export class SceneWorld extends Phaser.Scene {
     //this.marker.fillCircle(128, 64, 10);
     //this.marker.fillCircle(256, 512, 10);
     //this.marker.fillCircle(128, 448, 10);
+    this.drawMark(7, 7, Color.RandomRGB(), this.marker);
 
-    this.marker.lineStyle(7, 0x9966ff, 1);
-    this.marker.beginPath();
-    this.marker.moveTo(128, 0);
-    this.marker.lineTo(256, 64);
-    this.marker.lineTo(128, 128);
-    this.marker.lineTo(0, 64);
-    this.marker.lineTo(128, 0);
-    this.marker.closePath();
-    this.marker.strokePath(); //(0, 0, this.map.tileWidth, this.map.tileHeight);
+    //(0, 0, this.map.tileWidth, this.map.tileHeight);
     //this.floorLayer.tilemap.renderDebugFull(this.marker);
   }
 
@@ -268,22 +311,17 @@ export class SceneWorld extends Phaser.Scene {
     //    console.log(this.map.getTileAt(pointerTile.x, pointerTile.y));
 
     if (pointerTile) {
-      const worldCoord = this.floorLayer.tileToWorldXY(pointerTile.x, pointerTile.y);
+      this.marker.clear();
+      this.drawMark(pointerTile.x, pointerTile.y, Color.IntegerToColor(0x9966ff), this.marker);
+      // Snap to tile coordinates, but in world space
+      //this.marker.x = worldCoord.x;
+      //this.marker.y = worldCoord.y - tileFloorHeight[tileAt.index];
 
-      if (worldCoord) {
-        const tileAt = this.floorLayer.getTileAt(pointerTile.x, pointerTile.y);
-        if (tileAt) {
-          // Snap to tile coordinates, but in world space
-          this.marker.x = worldCoord.x;
-          this.marker.y = worldCoord.y - tileFloorHeight[tileAt.index];
+      //log(`mouse is at, ${worldCoord.x}, ${worldCoord.y}`);
+      //debugEvery(500);
 
-          //log(`mouse is at, ${worldCoord.x}, ${worldCoord.y}`);
-          //debugEvery(500);
-
-          this.params.coord.x = pointerTile.x;
-          this.params.coord.y = pointerTile.y;
-        }
-      }
+      this.params.coord.x = pointerTile.x;
+      this.params.coord.y = pointerTile.y;
     }
 
     this.pane.refresh();
